@@ -5,11 +5,11 @@
 #include <string>
 #include <sys/stat.h>
 #include <rosbag/bag.h>
-#include <geometry_msgs/Point.h>
 #include <sensor_msgs/PointCloud2.h>
+#include <sensor_msgs/Imu.h>
 
 
-#define PREFIX_PATH "/media/dongha/HDD/"
+#define PREFIX_PATH "/mnt/DataDisk/"
 bool data_logging;
 std::string data_prefix = "Stoplogging";
 std::string stop_logging_msg = "Stoplogging";
@@ -61,14 +61,30 @@ void dataPrefixCallBack(const std_msgs::String::ConstPtr & msg) {
 
 
 void lidar_port_subscribe_callback(const sensor_msgs::PointCloud2Ptr & ptcld) {
-    write_bag.write("/lidar_port/os_cloud_node/points", ptcld->header.stamp, *ptcld);
+    if(data_logging) {
+        write_bag.write("/lidar_port/os_cloud_node/points", ptcld->header.stamp, *ptcld);
+        // std::cout<<"I heard lidar_port"<<std::endl;
+    }
+}
+void imu_port_subscribe_callback(const sensor_msgs::ImuPtr & imu) {
+    if(data_logging) {
+        write_bag.write("/lidar_port/os_cloud_node/imu", imu->header.stamp, *imu);
+        // std::cout<<"I heard lidar_port imu"<<std::endl;
+    }
 }
 
 void lidar_starboard_subscribe_callback(const sensor_msgs::PointCloud2Ptr & ptcld) {
-    write_bag.write("/lidar_port/os_cloud_node/points", ptcld->header.stamp, *ptcld);
+    if(data_logging){
+        write_bag.write("/lidar_starboard/os_cloud_node/points", ptcld->header.stamp, *ptcld);
+        // std::cout<<"I heard lidar_starboard"<<std::endl;
+    }
 }
-
-
+void imu_starboard_subscribe_callback(const sensor_msgs::ImuPtr & imu) {
+    if(data_logging){
+        write_bag.write("/lidar_starboard/os_cloud_node/imu", imu->header.stamp, *imu);
+        // std::cout<<"I heard lidar_starboard imu"<<std::endl;
+    }
+}
 
 int main(int argc, char ** argv){
     // Will be implemented later
@@ -91,7 +107,14 @@ int main(int argc, char ** argv){
     ros::Subscriber sub_prefix = nh.subscribe("/save_prefix", 1, dataPrefixCallBack);
 
     ros::Subscriber lidar_port_sub = nh.subscribe("/lidar_port/os_cloud_node/points", 1, lidar_port_subscribe_callback);
+    ROS_INFO("SUBSCRIBING /lidar_port/os_cloud_node/points");
     ros::Subscriber lidar_starboard_sub = nh.subscribe("/lidar_starboard/os_cloud_node/points", 1, lidar_starboard_subscribe_callback);
+    ROS_INFO("SUBSCRIBING /lidar_starboard/os_cloud_node/points");
+
+    ros::Subscriber imu_port_sub = nh.subscribe("/lidar_port/os_cloud_node/imu", 1, imu_port_subscribe_callback);
+    ROS_INFO("SUBSCRIBING /lidar_port/os_cloud_node/imu");
+    ros::Subscriber imu_starboard_sub = nh.subscribe("/lidar_starboard/os_cloud_node/imu", 1, imu_starboard_subscribe_callback);
+    ROS_INFO("SUBSCRIBING /lidar_starboard/os_cloud_node/imu");
 
 
     ros::spin();
