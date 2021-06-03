@@ -9,9 +9,6 @@
 #include <sensor_msgs/PointCloud2.h>
 
 
-
-
-
 #define PREFIX_PATH "/media/dongha/HDD/"
 bool data_logging;
 std::string data_prefix = "Stoplogging";
@@ -52,7 +49,6 @@ void dataPrefixCallBack(const std_msgs::String::ConstPtr & msg) {
             data_prefix = msg->data;
             dir_name = PREFIX_PATH + data_prefix + ".bag";
             write_bag.open(dir_name, rosbag::bagmode::Write);
-
         }
     } else {
         if(data_prefix.compare(stop_logging_msg)!=0) {
@@ -63,17 +59,41 @@ void dataPrefixCallBack(const std_msgs::String::ConstPtr & msg) {
     }
 }
 
+
+void lidar_port_subscribe_callback(const sensor_msgs::PointCloud2Ptr & ptcld) {
+    write_bag.write("/lidar_port/os_cloud_node/points", ptcld->header.stamp, *ptcld);
+}
+
+void lidar_starboard_subscribe_callback(const sensor_msgs::PointCloud2Ptr & ptcld) {
+    write_bag.write("/lidar_port/os_cloud_node/points", ptcld->header.stamp, *ptcld);
+}
+
+
+
 int main(int argc, char ** argv){
-    if(argc>1) {
-        std::cout<<"Topics to record"<<std::endl;
-        for(int i = 1; i <argc ; ++i) {
-            std::cout<<argv[i]<<std::endl;
-        }
-    }
+    // Will be implemented later
+    // if(argc<2) {
+    //     std::cout<<"rosrun rosbag_record record_by_message <Topics>"<<std::endl;
+    //     return 0;
+    // }
+
+    // if(argc>1) {
+    //     std::cout<<"Topics to record"<<std::endl;
+    //     for(int i = 1; i <argc ; ++i) {
+    //         std::cout<<argv[i]<<std::endl;
+    //     }
+    // }
 
 
+    ros::init(argc, argv, "record_by_message");
+    ros::NodeHandle nh;
+    ros::Subscriber sub_bool = nh.subscribe("/datalogging", 1, dataLoggingFlagCallback);
+    ros::Subscriber sub_prefix = nh.subscribe("/save_prefix", 1, dataPrefixCallBack);
+
+    ros::Subscriber lidar_port_sub = nh.subscribe("/lidar_port/os_cloud_node/points", 1, lidar_port_subscribe_callback);
+    ros::Subscriber lidar_starboard_sub = nh.subscribe("/lidar_starboard/os_cloud_node/points", 1, lidar_starboard_subscribe_callback);
 
 
-
+    ros::spin();
     return 0;
 }

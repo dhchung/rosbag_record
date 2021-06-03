@@ -8,6 +8,8 @@ find_package(catkin REQUIRED COMPONENTS
     message_runtime
     rosbag
     std_msgs
+    geometry_msgs
+    sensor_msgs
 )
 set(CMAKE_CXX_FLAGS "-std=c++11 -O3 -Wall -g ${CMAKE_CXX_FLAGS}")
 
