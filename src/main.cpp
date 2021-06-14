@@ -9,7 +9,7 @@
 #include <sensor_msgs/Imu.h>
 
 
-#define PREFIX_PATH "/mnt/DataDisk/"
+#define PREFIX_PATH "/home/morin/Dataset/"
 bool data_logging;
 std::string data_prefix = "Stoplogging";
 std::string stop_logging_msg = "Stoplogging";
@@ -54,7 +54,9 @@ void dataPrefixCallBack(const std_msgs::String::ConstPtr & msg) {
         if(data_prefix.compare(stop_logging_msg)!=0) {
             std::cout<<"Prefix changed to stop logging"<<std::endl;
             data_prefix = msg->data;
-            write_bag.close();
+            if(write_bag.isOpen()) {
+                write_bag.close();
+            }
         }
     }
 }
@@ -62,27 +64,47 @@ void dataPrefixCallBack(const std_msgs::String::ConstPtr & msg) {
 
 void lidar_port_subscribe_callback(const sensor_msgs::PointCloud2Ptr & ptcld) {
     if(data_logging) {
-        write_bag.write("/lidar_port/os_cloud_node/points", ptcld->header.stamp, *ptcld);
-        // std::cout<<"I heard lidar_port"<<std::endl;
+        if(write_bag.isOpen()) {
+            write_bag.write("/lidar_port/os_cloud_node/points", ptcld->header.stamp, *ptcld);
+            // std::cout<<"I heard lidar_port"<<std::endl;
+            ROS_INFO("I heard lidar_port");
+        } else {
+            ROS_INFO("Trying to write port lidar message, but bag is not opened");
+        }
+
     }
 }
 void imu_port_subscribe_callback(const sensor_msgs::ImuPtr & imu) {
     if(data_logging) {
-        write_bag.write("/lidar_port/os_cloud_node/imu", imu->header.stamp, *imu);
-        // std::cout<<"I heard lidar_port imu"<<std::endl;
+        if(write_bag.isOpen()) {
+            write_bag.write("/lidar_port/os_cloud_node/imu", imu->header.stamp, *imu);
+            // std::cout<<"I heard lidar_port imu"<<std::endl;
+        } else {
+            ROS_INFO("Trying to write port imu message, but bag is not opened");
+        }
+
     }
 }
 
 void lidar_starboard_subscribe_callback(const sensor_msgs::PointCloud2Ptr & ptcld) {
     if(data_logging){
-        write_bag.write("/lidar_starboard/os_cloud_node/points", ptcld->header.stamp, *ptcld);
-        // std::cout<<"I heard lidar_starboard"<<std::endl;
+        if(write_bag.isOpen()) {
+            write_bag.write("/lidar_starboard/os_cloud_node/points", ptcld->header.stamp, *ptcld);
+            // std::cout<<"I heard lidar_starboard"<<std::endl;
+            ROS_INFO("I heard lidar_starboard");
+        } else {
+            ROS_INFO("Trying to write starboard lidar message, but bag is not opened");
+        }
     }
 }
 void imu_starboard_subscribe_callback(const sensor_msgs::ImuPtr & imu) {
     if(data_logging){
-        write_bag.write("/lidar_starboard/os_cloud_node/imu", imu->header.stamp, *imu);
-        // std::cout<<"I heard lidar_starboard imu"<<std::endl;
+        if(write_bag.isOpen()) {
+            write_bag.write("/lidar_starboard/os_cloud_node/imu", imu->header.stamp, *imu);
+            // std::cout<<"I heard lidar_starboard imu"<<std::endl;
+        } else {
+            ROS_INFO("Trying to write starboard imu message, but bag is not opened");
+        }
     }
 }
 
